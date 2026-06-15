@@ -52,6 +52,10 @@ export default function EnquiryDetailClient({ enquiry, initialNotes, users }: Pr
   const [notes, setNotes] = useState<EnquiryNote[]>(initialNotes)
   const [saving, setSaving] = useState(false)
 
+  const [customerName, setCustomerName] = useState(enquiry.customer_name || '')
+  const [email, setEmail] = useState(enquiry.email || '')
+  const [phone, setPhone] = useState(enquiry.phone || '')
+
   const business = enquiry.business as { name: string; domain?: string } | null
 
   async function updateStage(newStage: string) {
@@ -84,6 +88,9 @@ export default function EnquiryDetailClient({ enquiry, initialNotes, users }: Pr
   async function saveProcessSettings() {
     setSaving(true)
     const updates: Record<string, any> = {
+      customer_name: customerName || null,
+      email: email || null,
+      phone: phone || '',
       assigned_to: assignedTo || null,
       follow_up_at: followUpAt ? new Date(followUpAt).toISOString() : null,
     }
@@ -92,7 +99,7 @@ export default function EnquiryDetailClient({ enquiry, initialNotes, users }: Pr
     if (error) {
       toast.error('Failed to save settings')
     } else {
-      toast.success('Assignment and follow-up saved')
+      toast.success('Enquiry updated successfully')
       router.refresh()
     }
   }
@@ -104,13 +111,13 @@ export default function EnquiryDetailClient({ enquiry, initialNotes, users }: Pr
   ]
 
   const infoFields = [
-    { label: 'Customer Name', value: enquiry.customer_name },
-    { label: 'Email Address', value: enquiry.email },
-    { label: 'Phone Number', value: enquiry.phone },
-    { label: 'Source', value: enquiry.source },
-    { label: 'Business Context', value: business?.name },
+    { label: 'Customer Name', value: enquiry.customer_name || '—' },
+    { label: 'Email Address', value: enquiry.email || '—' },
+    { label: 'Phone Number', value: enquiry.phone || '—' },
+    { label: 'Source', value: enquiry.source || '—' },
+    { label: 'Business Context', value: business?.name || '—' },
     { label: 'Created At', value: formatDateTime(enquiry.created_at) },
-  ].filter(f => f.value)
+  ]
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -220,37 +227,70 @@ export default function EnquiryDetailClient({ enquiry, initialNotes, users }: Pr
               </div>
             </div>
 
-            {/* Assignment & Follow Up */}
+            {/* Enquiry Details & Assignment */}
             <div className="panel space-y-4">
-              <div className="section-heading">Assignment & Follow Up</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="form-label">Assign Agent</label>
-                  <select
-                    className="form-input"
-                    value={assignedTo}
-                    onChange={e => setAssignedTo(e.target.value)}
-                  >
-                    <option value="">Unassigned</option>
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.full_name}</option>
-                    ))}
-                  </select>
+              <div className="section-heading">Edit Enquiry Details</div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label">Customer Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerName}
+                      onChange={e => setCustomerName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="form-label">Follow Up Date</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={followUpAt}
-                    onChange={e => setFollowUpAt(e.target.value)}
-                  />
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Assign Agent</label>
+                    <select
+                      className="form-input"
+                      value={assignedTo}
+                      onChange={e => setAssignedTo(e.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {users.map(u => (
+                        <option key={u.id} value={u.id}>{u.full_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label">Follow Up Date</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={followUpAt}
+                      onChange={e => setFollowUpAt(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
+
               <div className="flex justify-end pt-2">
                 <button onClick={saveProcessSettings} disabled={saving} className="btn-primary gap-1">
                   <Save className="h-4 w-4" />
-                  Save Changes
+                  Save Details
                 </button>
               </div>
             </div>

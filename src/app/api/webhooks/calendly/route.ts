@@ -67,7 +67,18 @@ export async function POST(req: NextRequest) {
   if (event === 'invitee.created') {
     const inviteeName = payload.name || `${payload.first_name || ''} ${payload.last_name || ''}`.trim() || 'Anonymous'
     const inviteeEmail = payload.email
-    const inviteePhone = payload.text_reminder_number || ''
+    
+    let inviteePhone = payload.text_reminder_number || ''
+    if (!inviteePhone && payload.questions_and_answers && Array.isArray(payload.questions_and_answers)) {
+      const phoneQA = payload.questions_and_answers.find((qa: any) => {
+        const q = qa.question.toLowerCase()
+        return q.includes('phone') || q.includes('mobile') || q.includes('contact')
+      })
+      if (phoneQA && phoneQA.answer) {
+        inviteePhone = phoneQA.answer
+      }
+    }
+
     const eventUri = payload.event
 
     let eventName = 'Scheduled Call'
